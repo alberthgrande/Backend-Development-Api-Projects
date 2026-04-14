@@ -14,3 +14,35 @@ export const createUser = async ({ email, password }) => {
 
   return newUser;
 };
+
+export const updateUser = async ({ userId, email, password }) => {
+  const existingUser = await userRepo.findById(userId);
+  if (!existingUser) throw new Error("User not found");
+
+  if (email && email !== existingUser.email) {
+    const emailTaken = await userRepo.findByEmail(email);
+    if (emailTaken) throw new Error("Email already in use");
+  }
+
+  let updatedData = {
+    email: email ?? existingUser.email,
+    password: existingUser.password,
+  };
+
+  if (password) {
+    updatedData.password = await hashPassword(password);
+  }
+
+  const updatedUser = await userRepo.updateUser(userId, updatedData);
+
+  return updatedUser;
+};
+
+export const deleteUser = async (userId) => {
+  const existingUser = await userRepo.findById(userId);
+  if (!existingUser) throw new Error("User not found");
+
+  const deleted = await userRepo.deleteUser(userId);
+
+  return deleted;
+};
