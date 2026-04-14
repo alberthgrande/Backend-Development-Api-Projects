@@ -40,8 +40,8 @@ export const createProduct = async (req, res) => {
 
     res.status(201).json({
       status: true,
-      message: "Product created successfully",
       data: product,
+      message: "Product created successfully",
     });
   } catch (error) {
     res.status(error.status || 500).json({
@@ -60,8 +60,8 @@ export const updateProduct = async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: "Product updated successfully",
       data: product,
+      message: "Product updated successfully",
     });
   } catch (error) {
     res.status(error.status || 500).json({

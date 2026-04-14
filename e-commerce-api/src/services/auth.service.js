@@ -15,10 +15,11 @@ export const loginUser = async ({ email, password }) => {
   const payload = {
     id: user.id,
     email: user.email,
+    role_id: user.role_id,
   };
 
-  const accessToken = generateAccessToken(payload);
-  const refreshToken = generateRefreshToken(payload);
+  const accessToken = await generateAccessToken(payload);
+  const refreshToken = await generateRefreshToken(payload);
 
   return { accessToken, refreshToken };
 };

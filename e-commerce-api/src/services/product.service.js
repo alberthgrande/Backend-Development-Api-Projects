@@ -1,7 +1,13 @@
 import * as productRepo from "../repositories/product.repository.js";
 
 export const getProducts = async () => {
-  return productRepo.getProducts();
+  const products = await productRepo.getProducts();
+
+  if (products.length === 0) {
+    throw new Error("No products available");
+  }
+
+  return products;
 };
 
 export const createProduct = async ({ name, price, stock }) => {

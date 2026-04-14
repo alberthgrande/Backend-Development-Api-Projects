@@ -1,12 +1,23 @@
--- CREATE DATABASE
+-- CREATE DATABASE (run separately first)
 CREATE DATABASE ecommerce_db;
+
+-- connect to DB
+\c ecommerce_db;
+
+-- Create 'roles' table FIRST
+CREATE TABLE roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE
+);
 
 -- Create 'users' table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    password TEXT NOT NULL,
+    role_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 -- Create 'products' table
@@ -36,6 +47,6 @@ CREATE TABLE order_items (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
--- Optional: create an index to speed up queries on order_items
+-- Indexes
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX idx_order_items_product_id ON order_items(product_id);
