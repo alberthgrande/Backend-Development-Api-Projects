@@ -31,25 +31,24 @@ export const findById = async (userId) => {
 
 export const updateUser = async (userId, data) => {
   const { email, password } = data;
+
   const { rows } = await pool.query(
     `
-    UPDATE users 
+    UPDATE users
     SET email = $1, password = $2
     WHERE id = $3
-    RETURNING *
+    RETURNING id, email
     `,
-    [email, password, useId],
+    [email, password, userId],
   );
 
   return rows[0];
 };
 
 export const deleteUser = async (userId) => {
-  const { rowCount } = await pool.query(
-    `
-    DELETE FROM users WHERE id = $id`,
-    [userId],
-  );
+  const { rowCount } = await pool.query(`DELETE FROM users WHERE id = $1`, [
+    userId,
+  ]);
 
   return rowCount > 0;
 };
