@@ -1,7 +1,5 @@
-import { pool } from "../config/db.js";
-
-export const createOrder = async (userId, totalPrice) => {
-  const { rows } = await pool.query(
+export const createOrder = async (client, userId, totalPrice) => {
+  const { rows } = await client.query(
     `INSERT INTO orders (user_id, total_price)
         VALUES ($1, $2)
         RETURNING *`,
@@ -11,8 +9,8 @@ export const createOrder = async (userId, totalPrice) => {
   return rows[0];
 };
 
-export const createOrderItem = async (orderId, productId, quantity) => {
-  const { rows } = await pool.query(
+export const createOrderItem = async (client, orderId, productId, quantity) => {
+  const { rows } = await client.query(
     `INSERT INTO order_items (order_id, product_id, quantity)
         VALUES ($1, $2, $3)
         RETURNING *`,
@@ -22,8 +20,8 @@ export const createOrderItem = async (orderId, productId, quantity) => {
   return rows[0];
 };
 
-export const getOrdersByUserId = async (userId) => {
-  const { rows } = await pool.query(
+export const getOrdersByUserId = async (client, userId) => {
+  const { rows } = await client.query(
     `SELECT 
       o.id AS order_id,
       o.user_id,

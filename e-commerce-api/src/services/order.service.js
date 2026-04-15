@@ -1,55 +1,66 @@
+import { withTransaction, withClient } from "../utils/transaction.utils.js";
 import * as productRepo from "../repositories/product.repository.js";
 import * as orderRepo from "../repositories/order.repository.js";
 
 export const createOrder = async (userId, items) => {
-  const products = await Promise.all(
-    items.map((item) => productRepo.findProductById(item.productId)),
-  );
-
-  const totalPrice = items.reduce((acc, item, index) => {
-    const product = products[index];
-
-    if (!product) {
-      throw new Error(`Product ${item.productId} not found`);
-    }
-
-    if (product.stock < item.quantity) {
-      throw new Error(`Not enough stock for ${product.name}`);
-    }
-
-    return acc + product.price * item.quantity;
-  }, 0);
-
-  const order = await orderRepo.createOrder(userId, totalPrice);
-
-  for (const item of items) {
-    const product = products.find((p) => p.id === item.productId);
-
-    if (!product) {
-      throw new Error(`Product ${item.productId} not found`);
-    }
-
-    await orderRepo.createOrderItem(order.id, item.productId, item.quantity);
-    await productRepo.updateStock(
-      item.productId,
-      product.stock - item.quantity,
+  withTransaction(async (client) => {
+    const products = await Promise.all(
+      items.map((item) => productRepo.findProductById(client, item.productId)),
     );
-  }
 
-  return order;
+    const totalPrice = items.reduce((acc, item, index) => {
+      const product = products[index];
+
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found`);
+      }
+
+      if (product.stock < item.quantity) {
+        throw new Error(`Not enough stock for ${product.name}`);
+      }
+
+      return acc + product.price * item.quantity;
+    }, 0);
+
+    const order = await orderRepo.createOrder(client, userId, totalPrice);
+
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.productId);
+
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found`);
+      }
+
+      await orderRepo.createOrderItem(
+        client,
+        order.id,
+        item.productId,
+        item.quantity,
+      );
+      await productRepo.updateStock(
+        client,
+        item.productId,
+        product.stock - item.quantity,
+      );
+    }
+
+    return order;
+  });
 };
 
 export const getUserOrders = async (userId) => {
-  // Fetch orders from the repository layer
-  const orders = await orderRepo.getOrdersByUserId(userId);
+  return withClient(async (client) => {
+    // Fetch orders from the repository layer
+    const orders = await orderRepo.getOrdersByUserId(client, userId);
 
-  // If no orders are found
-  if (!orders || orders.length === 0) {
-    throw new Error("No orders found for this user.");
-  }
+    // If no orders are found
+    if (!orders || orders.length === 0) {
+      throw new Error("No orders found for this user.");
+    }
 
-  // Format orders and return the structured data
-  return formatOrders(orders);
+    // Format orders and return the structured data
+    return formatOrders(orders);
+  });
 };
 
 // Helper function to group order items by order

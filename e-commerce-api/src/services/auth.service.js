@@ -1,3 +1,4 @@
+import { withClient } from "../utils/transaction.utils.js";
 import * as userRepo from "../repositories/user.repository.js";
 import { comparePassword } from "../utils/password.util.js";
 import {
@@ -6,20 +7,22 @@ import {
 } from "../utils/jwt.util.js";
 
 export const loginUser = async ({ email, password }) => {
-  const user = await userRepo.findByEmail(email);
-  if (!user) throw new Error("Invalid credentials");
+  return withClient(async (client) => {
+    const user = await userRepo.findByEmail(client, email);
+    if (!user) throw new Error("Invalid credentials");
 
-  const match = await comparePassword(password, user.password);
-  if (!match) throw new Error("Invalid credentials");
+    const match = await comparePassword(password, user.password);
+    if (!match) throw new Error("Invalid credentials");
 
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role_id: user.role_id,
-  };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role_id: user.role_id,
+    };
 
-  const accessToken = await generateAccessToken(payload);
-  const refreshToken = await generateRefreshToken(payload);
+    const accessToken = await generateAccessToken(payload);
+    const refreshToken = await generateRefreshToken(payload);
 
-  return { accessToken, refreshToken };
+    return { accessToken, refreshToken };
+  });
 };
