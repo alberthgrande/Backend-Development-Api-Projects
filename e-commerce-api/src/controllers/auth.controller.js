@@ -24,3 +24,23 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
+export const refreshToken = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+
+    const result = await authService.refreshToken(token);
+
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+
+    res.json({
+      accessToken: result.accessToken,
+    });
+  } catch (err) {
+    res.status(401).json({ message: err.message });
+  }
+};
