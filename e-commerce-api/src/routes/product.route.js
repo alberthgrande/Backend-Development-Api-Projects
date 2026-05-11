@@ -13,12 +13,18 @@ router.get(
   requireAdmin,
   productController.findProductById,
 );
-router.put(
+router.patch(
   "/:id",
   authMiddleware,
   requireAdmin,
   productController.updateProduct,
 );
+// router.put(
+//   "/:id",
+//   authMiddleware,
+//   requireAdmin,
+//   productController.updateProduct,
+// );
 router.delete(
   "/:id",
   authMiddleware,

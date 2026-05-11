@@ -30,9 +30,12 @@ export const findProductById = async (client, id) => {
 export const updateProduct = async (client, { id, name, price, stock }) => {
   const { rows } = await client.query(
     `UPDATE products
-    SET name = $1, price = $2, stock = $3
-    WHERE id = $4
-    RETURNING *`,
+     SET name = $1,
+         price = $2,
+         stock = $3,
+         updated_at = NOW()
+     WHERE id = $4
+     RETURNING *`,
     [name, price, stock, id],
   );
 
